@@ -1,4 +1,4 @@
-set.seed(20230305)
+# set.seed(20230305)
 
 A <- 3L
 M <- 2L
@@ -56,10 +56,10 @@ for (m in seq(M)) {
 # fit
 lam <- 10^(seq(-3.5, 0.5, 0.1))
 nlam <- length(lam)
-eta <- 1
+eta <- 0.1
 type <- "continuous"
 intercept <- FALSE
-crit <- "BGL"
+crit <- "metric"
 rho <- 1
 reg <- "group-lasso"
 
@@ -88,22 +88,32 @@ for (m in 1:M) {
   }
 }
 
-# check fairness
-bgl.check.m <- matrix(0, nrow = nlam, ncol = A)
-for (l in 1:nlam) {
-  for (a in 1:A) {
-    for (m in 1:M) {
-      id.ma <- id.grp[[m]] == a
-      Xma <- X[[m]][id.ma,]
-      yma <- y[[m]][id.ma]
-      nma <- sum(id.ma)
-      thma <- fit.m$Estimates[, m, a, l]
-      bglma <- fair_bgl(X_ma = Xma, y_ma = yma,
-                        n_ma = nma, th_ma = thma,
-                        type = "continuous")
-      bgl.check.m[l, ] <- bgl.check.m[l, ] + bglma$fair
+# check bgl fairness
+if (crit == "bgl") {
+  bgl.check.m <- matrix(0, nrow = nlam, ncol = A)
+  for (l in 1:nlam) {
+    for (a in 1:A) {
+      for (m in 1:M) {
+        id.ma <- id.grp[[m]] == a
+        Xma <- X[[m]][id.ma,]
+        yma <- y[[m]][id.ma]
+        nma <- sum(id.ma)
+        thma <- fit.m$Estimates[, m, a, l]
+        bglma <- fair_bgl(X_ma = Xma, y_ma = yma,
+                          n_ma = nma, th_ma = thma,
+                          type = "continuous")
+        bgl.check.m[l, ] <- bgl.check.m[l, ] + bglma$fair
+      }
     }
   }
+  View(bgl.check.m/M/A)
 }
-View(bgl.check.m/M/A)
+
+
+# check metric fairness
+if (crit == "metric") {
+  metricfair <- apply(fit.m$Estimates, MARGIN = 4, FUN = metric_check, p, M, A)
+  View(t(metricfair))
+}
+
 fit.m$Iterations

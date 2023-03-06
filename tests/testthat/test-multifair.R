@@ -56,10 +56,12 @@ for (m in seq(M)) {
 # fit
 lam <- 10^(seq(-3.5, 0.5, 0.1))
 nlam <- length(lam)
-eta <- 0.1
 type <- "continuous"
 intercept <- FALSE
+# crit <- "BGL"
+# eta <- 2
 crit <- "metric"
+eta <- 0.1
 rho <- 1
 reg <- "group-lasso"
 
@@ -89,7 +91,7 @@ for (m in 1:M) {
 }
 
 # check bgl fairness
-if (crit == "bgl") {
+if (crit == "BGL") {
   bgl.check.m <- matrix(0, nrow = nlam, ncol = A)
   for (l in 1:nlam) {
     for (a in 1:A) {

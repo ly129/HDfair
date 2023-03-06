@@ -71,21 +71,20 @@ multifair <- function(X,
     lam_tmp <- lam[l]
 
     for (it in seq(maxit)) {
-      if (crit == "BGL") {
-        for (a in seq(A)) {
-          for (m in seq(M)) {
-            th_ma <- th[, m, a]
-            ls_ma <- loss_cts(
-              X_ma = Xma[[(m - 1) * A + a]],
-              y_ma = yma[[(m - 1) * A + a]],
-              n_ma = nma[m, a],
-              th_ma = th_ma
-            )
-            loss_full[m, a] <- ls_ma$loss
-            loss_grad_full[, m, a] <- ls_ma$loss_gr
-          }
+      for (a in seq(A)) {
+        for (m in seq(M)) {
+          th_ma <- th[, m, a]
+          ls_ma <- loss_cts(
+            X_ma = Xma[[(m - 1) * A + a]],
+            y_ma = yma[[(m - 1) * A + a]],
+            n_ma = nma[m, a],
+            th_ma = th_ma
+          )
+          loss_full[m, a] <- ls_ma$loss
+          loss_grad_full[, m, a] <- ls_ma$loss_gr
         }
-
+      }
+      if (crit == "BGL") {
         fr <- apply(loss_full, MARGIN = 2, FUN = mean)
         fr_grad <- loss_grad_full/M
         ls <- mean(loss_full)
@@ -94,19 +93,6 @@ multifair <- function(X,
         tmp <- delta + rho * fr - U
         grad_update <- ls_grad + fr_grad * rep(tmp, each = p * M)
       } else if (crit == "metric") {
-        for (a in seq(A)) {
-          for (m in seq(M)) {
-            th_ma <- th[, m, a]
-            ls_ma <- loss_cts(
-              X_ma = Xma[[(m - 1) * A + a]],
-              y_ma = yma[[(m - 1) * A + a]],
-              n_ma = nma[m, a],
-              th_ma = th_ma
-            )
-            loss_full[m, a] <- ls_ma$loss
-            loss_grad_full[, m, a] <- ls_ma$loss_gr
-          }
-        }
         ls <- mean(loss_full)
         ls_grad <- loss_grad_full/M/A
 
@@ -134,6 +120,8 @@ multifair <- function(X,
       }
 
       if (crit == "BGL") {
+        if (sum(fr < eta) == A && th_update_norm < eps) break
+      } else if (crit == "metric") {
         if (sum(fr < eta) == A && th_update_norm < eps) break
       } else {
         if ( th_update_norm < eps ) break

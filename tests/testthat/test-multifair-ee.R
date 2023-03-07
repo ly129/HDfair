@@ -6,6 +6,26 @@ p <- 20L
 p.nz <- floor(0.25 * p)
 n.M <- 200L * seq(M)
 
+library(survival)
+data_gen <- function(X, sigma, beta_true, censor, c = 0) {
+  p <- length(beta_true)
+  noise <- rnorm(n = 1, mean = 0, sd = sigma)
+  TT <- X %*% beta_true + noise
+  CC <- NULL
+  YY <- TT
+  Delta <- NULL
+  if (censor) {
+    if (c >= 0) {
+      CC <- runif(1, min = 0, max = c)
+    } else {
+      CC <- runif(1, min = c, max = 0)
+    }
+    Delta <- as.integer((TT < CC))
+    YY <- pmin(TT, CC)
+  }
+  return(c(YY, Delta))
+}
+
 # generate X
 X <- sapply(n.M,
             function(x) {
@@ -41,27 +61,65 @@ id.cnt <- mapply(FUN = function(x, p) {
 id.grp <- lapply(id.cnt, FUN = function(x) {sample(rep(seq(A), times = x))})
 
 # generate y
-y <- vector(mode = "list", length = M)
+yy <- delta <- vector(mode = "list", length = M)
 for (m in seq(M)) {
   nm <- n.M[m]
-  y[[m]] <- numeric(nm)
+  yy[[m]] <- numeric(nm)
+  delta[[m]] <- integer(nm)
   for (i in seq(nm)) {
     a.tmp <- id.grp[[m]][i]
     X.tmp <- X[[m]][i, ]
     th.tmp <- th[[m]][, a.tmp]
-    y[[m]][i] <- c(crossprod(X.tmp, th.tmp)) + rnorm(1, mean = 0, sd = 1)
+    dat.tmp <- data_gen(X = X.tmp, sigma = 1,
+                        beta_true = th.tmp,
+                        censor = TRUE, c = 5)
+    yy[[m]][i] <- dat.tmp[1]
+    delta[[m]][i] <- dat.tmp[2]
   }
+}
+
+y <- mapply(FUN = Surv, time = yy, event = delta)
+
+# estimating function
+ufunc <- function(x, y, b) {
+  n <- nrow(x)
+  p <- ncol(x)
+  yy <- y[, 1]
+  status <- y[, 2]
+  timeorig <- yy
+  dummystrat <- factor(rep(1, n))
+  ypred <- x %*% b
+  ehat <- timeorig - ypred
+  state <- status
+  state[ehat == max(ehat)] <- 1
+  S <- structure(cbind(ehat, state),
+                 class = "Surv", type = "right")
+  KM.ehat <- survfitKM(dummystrat, S,
+                       conf.type = "none",
+                       se.fit = FALSE)
+  n.risk <- KM.ehat$n.risk
+  surv <- KM.ehat$surv
+  repeats <- c(diff( - n.risk),
+               n.risk[length(n.risk)])
+  surv <- rep(surv, repeats)
+  w <-  - diff(c(1, surv))
+  m <- order(ehat,  - status)
+  bla <- cumsum((w * ehat[m]))
+  bla <- (bla[length(bla)] - bla)/(surv + state[m])
+  bl <- bla
+  bl[(1 : n)[m]] <- bla
+  yhat <- if (p == 0) bl else x %*% b + bl
+  yy[state == 0] <- yhat[state == 0]
+  return( c(- crossprod(x, (yy - x %*% b))/n) )
 }
 
 # fit
 lam <- 10^(seq(-3.5, 0.5, 0.1))
 nlam <- length(lam)
-type <- "continuous"
+type <- "custom"
 intercept <- FALSE
-crit <- "BGL"
-eta <- 2
-# crit <- "metric"
-# eta <- 0.1
+crit <- "metric"
+eta <- 0.1
 rho <- 1
 reg <- "group-lasso"
 
@@ -73,10 +131,11 @@ fit.m <- multifair(
   eta = eta,
   stepsize = 0.1,
   type = type,
+  custom_esti_func = ufunc,
   reg = reg,
   crit = crit,
   rho = rho,
-  maxit = 1e4,
+  maxit = 1e3,
   eps = 1e-20,
   verbose = TRUE
 )

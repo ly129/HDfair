@@ -10,6 +10,7 @@ multifair <- function(X,
                       stepsize,
                       intercept = FALSE,
                       type = "continuous",
+                      custom_esti_func = NULL,
                       reg = "group-lasso",
                       crit = "Metric",
                       rho = 1,
@@ -17,6 +18,7 @@ multifair <- function(X,
                       eps = 1e-6,
                       verbose = FALSE)
 {
+  # Checks
   # M
   M <- length(X)
 
@@ -33,6 +35,13 @@ multifair <- function(X,
   # A
   A <- as.integer(max(unique(unlist(group))))
 
+  if (type == "custom") {
+    if ( is.null(custom_esti_func) || !is.function(custom_esti_func )) {
+      stop("An R function needs to be provided to `custom_esti_func`")
+    }
+  }
+
+  # Pre-allocations
   nlam <- length(lam)
 
   Th <- array(0, dim = c(p, M, A, nlam))
@@ -42,20 +51,18 @@ multifair <- function(X,
 
   MA <- M * A
   Xma <- yma <- vector(mode = "list", length = MA)
-  nma <- matrix(NA, nrow = M, ncol = A)
+  # nma <- matrix(NA, nrow = M, ncol = A)
   for (m in seq(M)) {
-    Xm <- X[[m]]
-    ym <- y[[m]]
     for (a in seq(A)) {
       grpma <- group[[m]] == a
       tmp_list_id <- (m - 1) * A + a
-      nma[m, a] <- sum(grpma)
+      # nma[m, a] <- sum(grpma)
       if (intercept) {
-        Xma[[tmp_list_id]] <- cbind(1, Xm[grpma, ])
+        Xma[[tmp_list_id]] <- cbind(1, X[[m]][grpma, ])
       } else {
-        Xma[[tmp_list_id]] <- Xm[grpma, ]
+        Xma[[tmp_list_id]] <- X[[m]][grpma, ]
       }
-      yma[[tmp_list_id]] <- ym[grpma]
+      yma[[tmp_list_id]] <- y[[m]][grpma]
     }
   }
 
@@ -74,26 +81,43 @@ multifair <- function(X,
       for (a in seq(A)) {
         for (m in seq(M)) {
           th_ma <- th[, m, a]
-          ls_ma <- loss_cts(
-            X_ma = Xma[[(m - 1) * A + a]],
-            y_ma = yma[[(m - 1) * A + a]],
-            n_ma = nma[m, a],
-            th_ma = th_ma
-          )
-          loss_full[m, a] <- ls_ma$loss
-          loss_grad_full[, m, a] <- ls_ma$loss_gr
+          if (type == "continuous") {
+            ls_ma <- loss_cts(X_ma = Xma[[(m - 1) * A + a]],
+                              y_ma = yma[[(m - 1) * A + a]],
+                              # n_ma = nma[m, a],
+                              th_ma = th_ma)
+          } else if (type == "custom") {
+            ls_ma <- do.call(what = custom_esti_func,
+                             args = list(Xma[[(m - 1) * A + a]],
+                                         yma[[(m - 1) * A + a]],
+                                         # n_ma = nma[m, a],
+                                         th_ma))
+          }
+
+          if (crit == "BGL") {
+            loss_full[m, a] <- ls_ma$loss
+          }
+
+          if (type == "custom") {
+            loss_grad_full[, m, a] <- ls_ma
+          } else {
+            loss_grad_full[, m, a] <- ls_ma$loss_gr
+          }
         }
       }
       if (crit == "BGL") {
+        if (type == "custom") {
+          stop("BGL fairness constraint is not compatible with `custom` type.")
+        }
         fr <- apply(loss_full, MARGIN = 2, FUN = mean)
         fr_grad <- loss_grad_full/M
-        ls <- mean(loss_full)
+        # ls <- mean(loss_full)
         ls_grad <- loss_grad_full/M/A
 
         tmp <- delta + rho * fr - U
         grad_update <- ls_grad + fr_grad * rep(tmp, each = p * M)
       } else if (crit == "metric") {
-        ls <- mean(loss_full)
+        # ls <- mean(loss_full)
         ls_grad <- loss_grad_full/M/A
 
         ff <- fair_metric(th = th, p = p, M = M, A = A)

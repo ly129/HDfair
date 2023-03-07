@@ -96,12 +96,11 @@ for (l in 1:nlam) {
       yma <- y[[m]][id.ma]
       nma <- sum(id.ma)
       thma <- fit.s$Estimates[, m, l]
-      bglma <- fair_bgl(X_ma = Xma, y_ma = yma,
-                        n_ma = nma, th_ma = thma,
-                        type = "continuous")
-      bgl.check.s[l, ] <- bgl.check.s[l, ] + bglma$fair
+      bglma <- fair_bgl(X_ma = Xma, y_ma = yma, th_ma = thma,
+                        type = type)
+      bgl.check.s[l, a] <- bgl.check.s[l, a] + bglma$fair
     }
   }
 }
-View(bgl.check.s/M/A)
+View(bgl.check.s/M)
 fit.s$Iterations

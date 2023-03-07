@@ -16,6 +16,7 @@ singlefair <- function(X,
                        eps = 1e-6,
                        verbose = FALSE)
 {
+  # Checks
   # M
   M <- length(X)
 
@@ -32,6 +33,13 @@ singlefair <- function(X,
   # A
   A <- as.integer(max(unique(unlist(group))))
 
+  if (type == "custom") {
+    if ( is.null(custom_esti_func) || !is.function(custom_esti_func )) {
+      stop("An R function needs to be provided to `custom_esti_func`")
+    }
+  }
+
+  # Pre-allocations
   nlam <- length(lam)
 
   Th <- array(0, dim = c(p, M, nlam))
@@ -43,18 +51,16 @@ singlefair <- function(X,
   Xma <- yma <- vector(mode = "list", length = MA)
   nma <- matrix(NA, nrow = M, ncol = A)
   for (m in seq(M)) {
-    Xm <- X[[m]]
-    ym <- y[[m]]
     for (a in seq(A)) {
       grpma <- group[[m]] == a
       tmp_list_id <- (m - 1) * A + a
       nma[m, a] <- sum(grpma)
       if (intercept) {
-        Xma[[tmp_list_id]] <- cbind(1, Xm[grpma, ])
+        Xma[[tmp_list_id]] <- cbind(1, X[[m]][grpma, ])
       } else {
-        Xma[[tmp_list_id]] <- Xm[grpma, ]
+        Xma[[tmp_list_id]] <- X[[m]][grpma, ]
       }
-      yma[[tmp_list_id]] <- ym[grpma]
+      yma[[tmp_list_id]] <- y[[m]][grpma]
     }
   }
 
@@ -65,7 +71,8 @@ singlefair <- function(X,
   delta <- rep(0, A)
   iters <- integer(length = nlam)
 
-  loss_full <- fair_full <- matrix(nrow = M, ncol = A)
+  # loss_full <-
+  fair_full <- matrix(nrow = M, ncol = A)
   loss_grad_full <- fair_grad_full <- array(dim = c(p, M, A))
 
   for (l in seq(nlam)) {
@@ -80,10 +87,10 @@ singlefair <- function(X,
             ls_ma <- loss_cts(
               X_ma = Xma[[tmp_list_id]],
               y_ma = yma[[tmp_list_id]],
-              n_ma = nma[m, a],
+              # n_ma = nma[m, a],
               th_ma = th_m
             )
-            loss_full[m, a] <- ls_ma$loss * wts[m, a]
+            # loss_full[m, a] <- ls_ma$loss * wts[m, a]
             loss_grad_full[, m, a] <- ls_ma$loss_gr * wts[m, a]
             fair_full[m, a] <- ls_ma$loss
             fair_grad_full[, m, a] <- ls_ma$loss_gr
@@ -93,7 +100,7 @@ singlefair <- function(X,
         fr <- apply(fair_full, MARGIN = 2, FUN = mean)
         fr_grad <- fair_grad_full/M
 
-        ls <- mean(loss_full)
+        # ls <- mean(loss_full)
         ls_grad <- loss_grad_full/M/A
 
         tmp <- delta + rho * fr - U

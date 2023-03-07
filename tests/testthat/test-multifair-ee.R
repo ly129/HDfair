@@ -44,7 +44,7 @@ for (i in seq(M)) {
   epsilon.m <- rnorm(n = p.nz, mean = 0, sd = 0.3)
   for (j in seq(A)) {
     epsilon.a <- rnorm(n = p.nz, mean = 0, sd = 0.4)
-    th[[i]][1:p.nz, j] <- th.base #+ epsilon.m + epsilon.a
+    th[[i]][1:p.nz, j] <- th.base + j * 0.1 #+ epsilon.m + epsilon.a
   }
 }
 
@@ -114,7 +114,7 @@ ufunc <- function(x, y, b) {
 }
 
 # fit
-lam <- 10^(seq(-3.5, 0.5, 0.1))
+lam <- 10^(seq(0.5, -3.5, -0.1))
 nlam <- length(lam)
 type <- "custom"
 intercept <- FALSE

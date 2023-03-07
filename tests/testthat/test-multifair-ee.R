@@ -135,7 +135,7 @@ fit.m <- multifair(
   reg = reg,
   crit = crit,
   rho = rho,
-  maxit = 1e3,
+  maxit = 2e3,
   eps = 1e-20,
   verbose = TRUE
 )

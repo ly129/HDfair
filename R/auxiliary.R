@@ -38,3 +38,20 @@ metric_check <- function(th, p, M, A) {
   return(fair_metric(th, p, M, A)$fair)
 }
 
+
+# fair metric with th of list object
+fair_metric_list <- function(th_ma, p, M, A) {
+  th <- array(unlist(th_ma), dim = c(p, M, A))
+  th_bar <- apply(th, 1:2, mean)
+  th_ctrd <- apply(X = th, MARGIN = 3,
+                   FUN = "-", th_bar, simplify = FALSE)
+  th_ctrd <- array(unlist(th_ctrd), dim = c(p, M, A))
+  fair <- apply(th_ctrd^2, 3, sum)/2
+
+  gr = array(0, c(p, M, A, A))
+  for ( a in seq(A) ) {
+    gr[,,,a] = -th_ctrd[,,a]/A
+    gr[,,a,a] = (A-1)*th_ctrd[,,a]/A
+  }
+  return(list(fair = fair, fair_gr = gr))
+}

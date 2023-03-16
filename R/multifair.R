@@ -12,7 +12,7 @@ multifair <- function(X,
                       type = "continuous",
                       custom_esti_func = NULL,
                       reg = "group-lasso",
-                      crit = "Metric",
+                      crit = "metric",
                       rho = 1,
                       maxit = 1e3,
                       eps = 1e-6,
@@ -122,7 +122,7 @@ multifair <- function(X,
 
         ff <- fair_metric(th = th, p = p, M = M, A = A)
         fr <- ff$fair
-        tmp <- matrix(ff$fair_gr, ncol = A)%*% (delta + rho * (fr - U))
+        tmp <- matrix(ff$fair_gr, ncol = A) %*% (delta + rho * (fr - U))
         grad_update <- ls_grad + array(tmp, c(p, M, A))
       }
 

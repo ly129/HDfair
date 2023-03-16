@@ -2,7 +2,7 @@
 
 A <- 3L
 M <- 2L
-p <- 20L
+p <- 8L
 p.nz <- floor(0.25 * p)
 n.M <- 200L * seq(M)
 
@@ -53,29 +53,52 @@ for (m in seq(M)) {
   }
 }
 
+
+# estimating function
+custom_esti_func <- ufunc <- function(X_ma, y_ma, th_ma) {
+  n_ma <- length(y_ma)
+  resid <- y_ma - X_ma %*% th_ma
+  ufunc <- -c(crossprod(X_ma, resid)/n_ma)
+  return(ufunc)
+}
+
+custom_esti_func_gr <- ugrad <- function(X_ma, y_ma, th_ma) {
+  n_ma <- length(y_ma)
+  loss_gr <- crossprod(X_ma)/n_ma
+  return(loss_gr)
+}
+
 # fit
-lam <- 10^(seq(-3.5, 0.5, 0.1))
+# lam <- 10^(seq(2, 7, 0.1))
+lam <- 1
 nlam <- length(lam)
-type <- "continuous"
 intercept <- FALSE
 # crit <- "BGL"
 # eta <- 2
 crit <- "metric"
-eta <- 100
-rho <- 1
+eta_fr <- 1e-1
+eta_ee <- 1e-3
+rho_fr <- 1
+rho_ee <- 5e1
 reg <- "group-lasso"
+group <- id.grp
+stepsize <- 1e-4
 
-fit.m <- multifair(
-  X = X,
-  y = y,
-  group = id.grp,
-  lam = lam,
-  eta = eta,
-  stepsize = 0.1,
-  type = type,
-  reg = reg,
+fit.m <- multifairee(
+  X,
+  y,
+  group = group,
+  lam,
+  eta_fr,
+  eta_ee,
+  stepsize = stepsize,
+  intercept = FALSE,
+  custom_esti_func = ufunc,
+  custom_esti_func_gr = ugrad,
+  reg = "group-lasso",
   crit = crit,
-  rho = rho,
+  rho_fr = rho_fr,
+  rho_ee = rho_ee,
   maxit = 1e4,
   eps = 1e-20,
   verbose = TRUE
@@ -118,3 +141,17 @@ if (crit == "metric") {
 }
 
 fit.m$Iterations
+
+# check ee
+ee_max <- array(dim = c(M, A, nlam))
+for (l in 1:nlam) {
+  for (m in 1:M) {
+    for (a in 1:A) {
+      Xma <- X[[m]][id.grp[[m]] == a, ]
+      yma <- y[[m]][id.grp[[m]] == a]
+      thmal <- fit.m$Estimates[,m,a,l]
+      ee_max[m, a, l] <- max(abs(ufunc(Xma, yma, thmal)))
+    }
+  }
+}
+ee_max

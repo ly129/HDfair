@@ -24,7 +24,7 @@ for (i in seq(M)) {
   epsilon.m <- rnorm(n = p.nz, mean = 0, sd = 0.3)
   for (j in seq(A)) {
     epsilon.a <- rnorm(n = p.nz, mean = 0, sd = 0.4)
-    th[[i]][1:p.nz, j] <- th.base #+ epsilon.m + epsilon.a
+    th[[i]][1:p.nz, j] <- th.base - 0.1 * i + 0.2 * j #+ epsilon.m + epsilon.a
   }
 }
 
@@ -61,7 +61,7 @@ intercept <- FALSE
 # crit <- "BGL"
 # eta <- 2
 crit <- "metric"
-eta <- 100
+eta <- 0.01
 rho <- 1
 reg <- "group-lasso"
 

@@ -1,11 +1,13 @@
 # least squares loss functions for a single dataset-group pair
 # loss = 1/2 * || y - x %*% th ||_2^2
 loss_cts <- function(X_ma, y_ma, th_ma) {
-  n_ma <- length(y_ma)
-  resid <- y_ma - X_ma %*% th_ma
-  loss <- sum(resid^2)/2/n_ma
-  loss_gr <- -c(crossprod(X_ma, resid)/n_ma)
-  return(list(loss = loss, loss_gr = loss_gr))
+  resid <- c(y_ma - X_ma %*% th_ma)
+  return(mean(resid * resid)/2)
+}
+
+loss_cts_grad <- function(X_ma, y_ma, th_ma) {
+  resid <- c(y_ma - X_ma %*% th_ma)
+  return(-c(crossprod(X_ma, resid))/length(y_ma))
 }
 
 # BGL fair function
@@ -34,7 +36,11 @@ fair_metric <- function(th, p, M, A) {
 }
 
 # check metric
-metric_check <- function(th, p, M, A) {
+metric_check <- function(th) {
+  dims <- dim(th)
+  p <- dims[1]
+  M <- dims[2]
+  A <- dims[3]
   return(fair_metric(th, p, M, A)$fair)
 }
 

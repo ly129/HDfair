@@ -2,23 +2,23 @@
 #' @param data A list containing the datasets from \eqn{M} sources.
 #' @param outcome Character string or integer indicating the name of the outcome variable or the column index of the outcome variable.
 #' @param group Character string or integer indicating the name of the grouping variable or the column index of the grouping variable.
-multifairee <- function(X,
-                        y,
-                        group,
-                        lam,
-                        eta_fr,
-                        eta_ee,
-                        stepsize = 1,
-                        intercept = FALSE,
-                        custom_esti_func = NULL,
-                        custom_esti_func_gr = NULL,
-                        reg = "group-lasso",
-                        crit = "metric",
-                        rho_fr = 1,
-                        rho_ee = 1,
-                        maxit = 1e3,
-                        eps = 1e-6,
-                        verbose = FALSE)
+multifairee <- function(
+    X,
+    y,
+    group,
+    eta_fr,
+    eta_ee,
+    stepsize = 1,
+    intercept = FALSE,
+    custom_esti_func = NULL,
+    custom_esti_func_gr = NULL,
+    reg = "group-lasso",
+    crit = "metric",
+    rho_fr = 1,
+    rho_ee = 1,
+    maxit = 1e3,
+    eps = 1e-6,
+    verbose = FALSE)
 {
   # Checks
   # M
@@ -38,12 +38,12 @@ multifairee <- function(X,
   A <- as.integer(max(unique(unlist(group))))
 
   # Pre-allocations
-  nlam <- length(lam)
+  neta_ee <- length(eta_ee)
 
-  Th <- array(0, dim = c(p, M, A, nlam))
+  Th <- array(0, dim = c(p, M, A, neta_ee))
   th <- array(0, dim = c(p, M, A))
 
-  iters <- integer(length = nlam)
+  iters <- integer(length = neta_ee)
 
   MA <- M * A
 
@@ -68,10 +68,10 @@ multifairee <- function(X,
     }
   }
 
-  iters <- integer(length = nlam)
+  iters <- integer(length = neta_ee)
 
-  for (l in seq(nlam)) {
-    lam_tmp <- lam[l]
+  for (l in seq(neta_ee)) {
+    eta_ee_tmp <- eta_ee[l]
 
     for (it in seq(maxit)) {
       thma <- lapply(seq(MA) - 1, FUN = function(x) th[, x %% M + 1, x %/% M + 1])
@@ -88,12 +88,12 @@ multifairee <- function(X,
 
       grad_update <- array(tmp_ee, c(p, M, A)) + array(tmp_ff, c(p, M, A))
 
-      th_new <- prox(th - stepsize * grad_update, lam_tmp * stepsize, reg)
+      th_new <- prox(th - stepsize * grad_update, stepsize, reg)
 
       # step 2b
       U <- pmax(-eta_fr, pmin(eta_fr, fr + delta/rho_fr))
       V <- mapply(function(x, y){
-        pmax(-eta_ee, pmin(eta_ee, x + y/rho_ee))
+        pmax(-eta_ee_tmp, pmin(eta_ee_tmp, x + y/rho_ee))
       }, ufunc, xi, SIMPLIFY = FALSE)
 
       # step 2c
@@ -101,21 +101,21 @@ multifairee <- function(X,
       xi <- mapply(function(x, y, z) {
         x + rho_ee * (y - z)
       }, xi, ufunc, V, SIMPLIFY = FALSE)
-      # th <- th_new
 
-      if (it == maxit) message("Maximum iteration reached at lambda = ", lam_tmp, "\n")
+      if (it == maxit) message("Maximum iteration reached at eta_ee = ", eta_ee_tmp, "\n")
 
       # convergence check
       th_update_norm <- sum((th_new - th)^2)/p/M/A
 
       if (verbose) {
-        cat("Lambda = ", lam_tmp, ", Iteration ", it, ", Theta update = ", th_update_norm, "\n", sep = "")
+        cat("eta_ee = ", eta_ee_tmp, ", Iteration ", it, ", Theta update = ", th_update_norm, "\n", sep = "")
       }
 
       if (crit == "BGL") {
         if (sum(fr < eta) == A && th_update_norm < eps) break
       } else if (crit == "metric") {
-        if (sum(fr < eta_fr) == A && max(abs(unlist(ufunc))) < eta_ee && th_update_norm < eps) break
+        cat("etafr", sum(fr < eta_fr), "maxee", max(abs(unlist(ufunc))), "\n")
+        if (sum(fr < eta_fr) == A && max(abs(unlist(ufunc))) < eta_ee_tmp && th_update_norm < eps) break
       } else {
         if ( th_update_norm < eps ) break
       }

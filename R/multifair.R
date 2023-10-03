@@ -137,10 +137,10 @@ multifair <- function(X,
       if (it == maxit) message("Maximum iteration reached at lambda = ", lam_tmp, "\n")
 
       # convergence check
-      th_update_norm <- sum((th_new - th)^2)/p/M/A
+      th_update_norm <- sqrt(sum((th_new - th)^2))/p/M/A
 
       if (verbose) {
-        cat("Lambda = ", lam_tmp, ", Iteration ", it, ",\n Theta update = ", th_update_norm, "\n", sep = "")
+        cat("Lambda = ", lam_tmp, ", Iteration ", it, ", Theta update = ", th_update_norm, "\n", sep = "")
       }
 
       if (crit == "BGL") {

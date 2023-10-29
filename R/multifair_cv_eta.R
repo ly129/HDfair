@@ -71,7 +71,7 @@ multifair_cv_eta <- function(
   # if (is.null(foldid)) {
   foldid <- lapply(n, integer)
   for (m in 1:M) {
-    id_by_grp <- split(1:n[[m]], id.grp[[m]])
+    id_by_grp <- split(1:n[[m]], group[[m]])
     foldid_by_grp <- unlist(lapply(id_by_grp, FUN = function(x) sample(rep(seq(nfolds), length.out = length(x)))))
     foldid[[m]][unlist(id_by_grp)] <- foldid_by_grp
   }

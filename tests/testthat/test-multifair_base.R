@@ -9,14 +9,14 @@ th <- vector("list", M)
 th.base <- 0.5
 for (i in seq(M)) {
   th[[i]] <- matrix(0, nrow = p, ncol = A)
-  epsilon.m <- rnorm(n = p.nz, mean = 0, sd = 0.3)
-  for (j in seq(A)) {
-    epsilon.a <- rnorm(n = p.nz, mean = 0, sd = 0.4)
-    th[[i]][1:p.nz, j] <- th.base + (0.1 * i - 0.03 * j) * rep(c(1, -1), length.out = p.nz) * ((1:p.nz) - mean(p.nz)) + epsilon.m + epsilon.a
-  }
-  # th[[i]][1:p.nz, 1] <- rep(c(0.2, 0.5, 0.8), length.out = p.nz) # 0.5
-  # th[[i]][1:p.nz, 2] <-rep(c(0.5, 0.8, 0.2), length.out = p.nz) # 0.2
-  # th[[i]][1:p.nz, 3] <- rep(c(0.8, 0.2, 0.5), length.out = p.nz) # 0.8 # rep(c(0.6, 0.7, 0.8, 0.9, 1.0), length.out = p.nz)
+  # epsilon.m <- rnorm(n = p.nz, mean = 0, sd = 0.3)
+  # for (j in seq(A)) {
+  #   epsilon.a <- rnorm(n = p.nz, mean = 0, sd = 0.4)
+  #   th[[i]][1:p.nz, j] <- th.base + (0.1 * i - 0.03 * j) * rep(c(1, -1), length.out = p.nz) * ((1:p.nz) - mean(p.nz)) + epsilon.m + epsilon.a
+  # }
+  th[[i]][1:p.nz, 1] <- rep(c(0.2, 0.5, 0.8), length.out = p.nz) # 0.5
+  th[[i]][1:p.nz, 2] <-rep(c(0.5, 0.8, 0.2), length.out = p.nz) # 0.2
+  th[[i]][1:p.nz, 3] <- rep(c(0.8, 0.2, 0.5), length.out = p.nz) # 0.8 # rep(c(0.6, 0.7, 0.8, 0.9, 1.0), length.out = p.nz)
 }
 head(th[[1]], p.nz)
 
@@ -76,7 +76,7 @@ results <- multifair_base(
   y = y,
   group = id.grp,
   lambda = 1e-6,
-  eta = 0.5,
+  eta = 0.2,
   stepsize = 0.1,
   intercept = FALSE,
   # theta_init = array(0.5, dim = c(p, M, A)),
@@ -111,56 +111,17 @@ sp.results.lam <- multifair_sp_lambda(
 )
 
 sp.results.lam$Iterations
-plot_multifair_sp(sp.results.lam)
+plot_multifair_sp_lam(sp.results.lam)
 
 sp.results.eta <- multifair_sp_eta(
   x = x,
   y = y,
   group = id.grp,
-  lambda = 1e-10,
+  lambda = 1e-1,
   eta_seq = c(2, seq(1, 0.1, -0.1), 0.01, 0.001),
   stepsize = 0.1,
   intercept = FALSE,
   # theta_init = array(0.5, dim = c(p, M, A)),
-  type = "continuous",
-  reg = reg,
-  crit = "metric",
-  rho = 0.1,
-  maxit = 1e3,
-  tol = 1e-8,
-  verbose = FALSE
-)
-
-sp.results.eta$Iterations
-plot_multifair_sp(sp.results.eta)
-
-################################################################################
-weighted.glm <- glmnet::glmnet(
-  x = x[[1]],
-  y = y[[1]],
-  lambda = 0,
-  intercept = FALSE,
-  weights = ifelse(id.grp[[1]] == 1, 1/0.9,
-                   ifelse(id.grp[[1]] == 2,
-                          1/0.06,
-                          1/0.04))
-)
-# plot(weighted.glm)
-
-th.glmnet <- as.vector(coef(weighted.glm)[-1])
-
-th.init <- array(dim = c(p, M, A))
-th.init[, 1:M, 1:A] <- th.glmnet
-
-sp.results.eta <- multifair_sp_eta(
-  x = x,
-  y = y,
-  group = id.grp,
-  lambda = 0,
-  eta_seq = c(2, seq(1, 0.1, -0.1), 0.01, 0.001, 0.0001, 0.00001, 0.000001),
-  stepsize = 0.1,
-  intercept = FALSE,
-  theta_init = th.init,
   type = "continuous",
   reg = reg,
   crit = "metric",
@@ -171,23 +132,68 @@ sp.results.eta <- multifair_sp_eta(
 )
 
 sp.results.eta$Iterations
-plot_multifair_sp(sp.results.eta)
+plot_multifair_sp_eta(sp.results.eta, n = seq(p.nz))
 
-apply(sp.results.eta$Estimates, 4, FUN = metric_check)
-
-matplot(x = sp.results.eta$Etas,
-        y = t(sp.results.eta$Estimates[,1,1,]),
-        type = "l", log = "x", lwd = 2)
-abline(h = th.glmnet[1:5], lty = 1:5, col = 1:6, lwd = 2)
-
-matplot(x = sp.results.eta$Etas,
-        y = t(sp.results.eta$Estimates[,1,3,]),
-        type = "l", log = "x", lwd = 2)
-abline(h = th.glmnet[1:5], lty = 1:5, col = 1:6, lwd = 2)
+################################################################################
+# weights <- ifelse(id.grp[[1]] == 1, 1/0.9,
+#                   ifelse(id.grp[[1]] == 2,
+#                          1/0.06,
+#                          1/0.04))
+# weights <- weights/sum(weights) * n.M[1]
+#
+# weighted.glm <- glmnet::glmnet(
+#   x = x[[1]],
+#   y = y[[1]],
+#   lambda = 0,
+#   intercept = FALSE,
+#   weights = weights,
+#   thresh = 1e-20
+# )
+# # plot(weighted.glm)
+#
+# th.glmnet <- as.vector(coef(weighted.glm)[-1])
+# th.glmnet
+#
+# th.init <- array(dim = c(p, M, A))
+# th.init[, 1:M, 1:A] <- th.glmnet
+#
+# sp.results.eta <- multifair_sp_eta(
+#   x = x,
+#   y = y,
+#   group = id.grp,
+#   lambda = 0,
+#   eta_seq = c(2, seq(1, 0.1, -0.1), 0.01, 0.001, 0.0001, 0.00001, 0.000001),
+#   stepsize = 0.1,
+#   intercept = FALSE,
+#   # theta_init = th.init,
+#   type = "continuous",
+#   reg = reg,
+#   crit = "metric",
+#   rho = 5,
+#   maxit = 1e4,
+#   tol = 1e-8,
+#   verbose = FALSE
+# )
+# sp.results.eta$Estimates[,1,1,1]
+#
+# sp.results.eta$Iterations
+# plot_multifair_sp_eta(sp.results.eta, n = seq(p.nz))
+#
+# apply(sp.results.eta$Estimates, 4, FUN = metric_check)
+#
+# matplot(x = sp.results.eta$Etas,
+#         y = t(sp.results.eta$Estimates[,1,1,]),
+#         type = "l", log = "x", lwd = 2)
+# abline(h = th.glmnet[1:5], lty = 1:5, col = 1:6, lwd = 2)
+#
+# matplot(x = sp.results.eta$Etas,
+#         y = t(sp.results.eta$Estimates[,1,3,]),
+#         type = "l", log = "x", lwd = 2)
+# abline(h = th.glmnet[1:5], lty = 1:5, col = 1:6, lwd = 2)
 ################################################################################
 
 
-n.alternate <- 5
+n.alternate <- 10
 
 etasss <- lamsss <- rep(NA, n.alternate)
 etasss[1] <- 10
@@ -197,7 +203,7 @@ for (nn in 1:n.alternate) {
     x = x,
     y = y,
     group = id.grp,
-    lambda_seq = 10^seq(0, -5, -0.5),
+    lambda_seq = 10^seq(0, -2, -0.1),
     eta = etasss[nn],
     nfolds = 5L,
     foldid = NULL,
@@ -222,7 +228,7 @@ for (nn in 1:n.alternate) {
     y = y,
     group = id.grp,
     lambda = lamsss[nn],
-    eta_seq = c(seq(1, 0.1, -0.1), 0.05, 0.01),
+    eta_seq = c(seq(0.5, 0.1, -0.05), 0.05, 0.01),
     nfolds = 5L,
     foldid = NULL,
     stepsize = 0.1,
@@ -241,7 +247,7 @@ for (nn in 1:n.alternate) {
   plot_multifair_cv_eta(cv.results.eta)
 }
 
-
+lamsss; etasss
 
 # results2 <- multifair(
 #   x = x,

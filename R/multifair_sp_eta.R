@@ -35,7 +35,7 @@ multifair_sp_eta <- function(
   if (intercept) p <- p + 1
 
   neta <- length(eta_seq)
-  eta_seq <- sort(eta_seq, decreasing = FALSE)
+  eta_seq <- sort(eta_seq, decreasing = TRUE)
 
   Theta <- array(NA, dim = c(p, M, A, neta))
   Iterations <- integer(neta)
@@ -96,4 +96,32 @@ multifair_sp_eta <- function(
   return(list(Estimates = Theta,
               Iterations = Iterations,
               Etas = eta_seq))
+}
+
+
+
+
+
+plot_multifair_sp_eta <- function(multifair_sp, n = 1:6, type = "l", log = "x", ...) {
+  dims <- dim(multifair_sp$Estimates)
+  M <- dims[2]
+  A <- dims[3]
+
+  par(mfrow = c(1, length(n)))
+
+  for (i in n) {
+      ylab <- paste0("Variable No. ", i)
+      yy <- multifair_sp$Estimates[i, , , ]
+      if (!is.matrix(yy)) {
+        yy <- apply(yy, MARGIN = 3, FUN = as.vector)
+      }
+      matplot(x = multifair_sp[[3]],
+              y = t(yy),
+              type = type,
+              log = log,
+              xlab = expression(paste(eta)),
+              ylab = ylab,
+              ...)
+  }
+  par(mfrow = c(1, 1))
 }

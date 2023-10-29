@@ -99,16 +99,10 @@ multifair_sp_lambda <- function(
 }
 
 
-plot_multifair_sp <- function(multifair_sp, type = "l", log = "x", ...) {
+plot_multifair_sp_lam <- function(multifair_sp, type = "l", log = "x", ...) {
   dims <- dim(multifair_sp$Estimates)
   M <- dims[2]
   A <- dims[3]
-
-  if (!is.null(multifair_sp$Etas)) {
-    sp_type = "eta"
-  } else if (!is.null(multifair_sp$Lambdas)) {
-    sp_type = "lambda"
-  }
 
   par(mfrow = c(M, A))
 
@@ -119,7 +113,7 @@ plot_multifair_sp <- function(multifair_sp, type = "l", log = "x", ...) {
               y = t(multifair_sp$Estimates[, m, a, ]),
               type = type,
               log = log,
-              xlab = sp_type,
+              xlab = expression(paste(lambda)),
               ylab = ylab,
               ...)
     }

@@ -105,7 +105,7 @@ multifair_base <- function(
     th_update_norm <- norm((th_new - th), "2")/p/M/A
 
     if (verbose) {
-      cat("Lambda = ", lambda, ", Iteration ", it, ", Theta update = ", th_update_norm, "\n", sep = "")
+      cat("Lambda = ", lambda, ", Eta = ", eta, ", Iteration ", it, ", Theta update = ", th_update_norm, "\n", sep = "")
     }
 
     if (crit == "metric") {

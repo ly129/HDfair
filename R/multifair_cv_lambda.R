@@ -71,7 +71,8 @@ multifair_cv_lambda <- function(
     foldid <- lapply(n, integer)
     for (m in 1:M) {
       id_by_grp <- split(1:n[[m]], group[[m]])
-      foldid_by_grp <- unlist(lapply(id_by_grp, FUN = function(x) sample(rep(seq(nfolds), length.out = length(x)))))
+      foldid_by_grp <- unlist(lapply(id_by_grp,
+                                     FUN = function(x) sample(rep(seq(nfolds), length.out = length(x)))))
       foldid[[m]][unlist(id_by_grp)] <- foldid_by_grp
     }
   }
@@ -90,7 +91,7 @@ multifair_cv_lambda <- function(
     val_y <- mapply(subset, y, which_val, SIMPLIFY = FALSE)
     val_grp <- mapply(subset, group, which_val, SIMPLIFY = FALSE)
 
-    sp <- multifair_sp_lambda(
+    sp_fold <- multifair_sp_lambda(
       train_x,
       train_y,
       train_grp,
@@ -115,13 +116,13 @@ multifair_cv_lambda <- function(
         val_xma <- val_x[[m]][index_ma, ]
         val_yma <- val_y[[m]][index_ma]
         for (l in 1:nlam) {
-          th_mal <- sp$Estimates[, m, a, l]
+          th_mal <- sp_fold$Estimates[, m, a, l]
           loss_mat[i, l] <- loss_mat[i, l] + loss_cts(val_xma, val_yma, th_mal)
         }
       }
     }
   }
-  loss_mat
+  # loss_mat
 
   ### cv evaluation
   cvm <- apply(loss_mat, MARGIN = 2, FUN = mean)
@@ -157,7 +158,9 @@ multifair_cv_lambda <- function(
                      nzero = nzero,
                      lambda.min = lambda_seq[lam.min],
                      lambda.1se = lambda_seq[lam.1se],
+                     index = c(lam.min = lam.min, lam.1se = lam.1se),
                      Regularization = reg,
+                     foldid = foldid,
                      sp = sp)
   return(return.obj)
 }

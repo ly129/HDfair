@@ -99,7 +99,7 @@ multifair_sp_lambda <- function(
 }
 
 
-plot_multifair_sp_lam <- function(multifair_sp, type = "l", log = "x", ...) {
+plot_multifair_sp_lambda <- function(multifair_sp, type = "l", log = "x", ...) {
   dims <- dim(multifair_sp$Estimates)
   M <- dims[2]
   A <- dims[3]

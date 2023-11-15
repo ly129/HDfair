@@ -99,7 +99,7 @@ multifair_base <- function(
     # step 2c
     delta <- delta + rho * c(fr - U)
 
-    if (it == maxit) message("Maximum iteration reached at lambda = ", lambda, ", eta = ", eta, "\n")
+    # if (it == maxit) message("Maximum iteration reached at lambda = ", lambda, ", eta = ", eta, "\n")
 
     # convergence check
     th_update_norm <- norm((th_new - th), "2")/p/M/A

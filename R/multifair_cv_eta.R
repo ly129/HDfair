@@ -40,7 +40,6 @@ multifair_cv_eta <- function(
   eta_seq <- sort(eta_seq, decreasing = TRUE)
 
   ### Initial solution path
-  ### refit
   sp <- multifair_sp_eta(
     x,
     y,
@@ -91,7 +90,7 @@ multifair_cv_eta <- function(
     val_y <- mapply(subset, y, which_val, SIMPLIFY = FALSE)
     val_grp <- mapply(subset, group, which_val, SIMPLIFY = FALSE)
 
-    sp <- multifair_sp_eta(
+    sp_fold <- multifair_sp_eta(
       train_x,
       train_y,
       train_grp,
@@ -116,13 +115,13 @@ multifair_cv_eta <- function(
         val_xma <- val_x[[m]][index_ma, ]
         val_yma <- val_y[[m]][index_ma]
         for (l in 1:neta) {
-          th_mal <- sp$Estimates[, m, a, l]
+          th_mal <- sp_fold$Estimates[, m, a, l]
           loss_mat[i, l] <- loss_mat[i, l] + loss_cts(val_xma, val_yma, th_mal)
         }
       }
     }
   }
-  loss_mat
+  # loss_mat
 
   ### cv evaluation
   cvm <- apply(loss_mat, MARGIN = 2, FUN = mean)
@@ -157,6 +156,7 @@ multifair_cv_eta <- function(
                      cvlo = cvlo,
                      nzero = nzero,
                      eta.min = eta_seq[eta.min],
+                     index = eta.min,
                      # lambda.1se = lambda_seq[lam.1se],
                      Regularization = reg,
                      sp = sp)

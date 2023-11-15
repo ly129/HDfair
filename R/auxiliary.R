@@ -2,12 +2,12 @@
 # loss = 1/2 * || y - x %*% th ||_2^2
 loss_cts <- function(X_ma, y_ma, th_ma) {
   resid <- c(y_ma - X_ma %*% th_ma)
-  return(mean(resid * resid)/2)
+  return(sum(resid * resid)/2)
 }
 
 loss_cts_grad <- function(X_ma, y_ma, th_ma) {
   resid <- c(y_ma - X_ma %*% th_ma)
-  return(-c(crossprod(X_ma, resid))/length(y_ma))
+  return(-c(crossprod(X_ma, resid)))
 }
 
 # BGL fair function

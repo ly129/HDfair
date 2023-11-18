@@ -35,7 +35,7 @@ multifair_sp_eta <- function(
   if (intercept) p <- p + 1
 
   neta <- length(eta_seq)
-  eta_seq <- sort(eta_seq, decreasing = TRUE)
+  eta_seq <- sort(eta_seq, decreasing = FALSE)
 
   Theta <- array(NA, dim = c(p, M, A, neta))
   Iterations <- integer(neta)

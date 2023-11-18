@@ -37,7 +37,7 @@ multifair_cv_eta <- function(
   if (intercept) p <- p + 1
 
   neta <- length(eta_seq)
-  eta_seq <- sort(eta_seq, decreasing = TRUE)
+  eta_seq <- sort(eta_seq, decreasing = FALSE)
 
   ### Initial solution path
   sp <- multifair_sp_eta(

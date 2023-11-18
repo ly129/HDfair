@@ -69,7 +69,7 @@ multifair_base <- function(
         tmp_list_id <- (m - 1) * A + a
         loss_grad_full[, m, a] <- loss_cts_grad(xma[[tmp_list_id]],
                                                 yma[[tmp_list_id]],
-                                                th[, m, a])/n_M[m]
+                                                th[, m, a])/sum(n_M)
         # thma[[tmp_list_id]] <- th[, m, a]
       }
     }

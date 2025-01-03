@@ -1,4 +1,4 @@
-#' Main solver of \code{FairReg}
+#' Main solver of \code{HDfair}
 #' @param X Predictors.
 singlefair <- function(X,
                        y,

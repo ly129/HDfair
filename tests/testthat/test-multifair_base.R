@@ -271,7 +271,7 @@ lamsss; etasss
 # identical(results$Estimates, results2$Estimates[,,,1])
 # (metric.fair2 <- metric_check(results2$Estimates[,,,1], p, M, A))
 #
-# microbenchmark::microbenchmark(results <- FairReg::multifair_base(
+# microbenchmark::microbenchmark(results <- HDfair::multifair_base(
 #   x = x,
 #   y = y,
 #   group = id.grp,

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(FairReg)
+library(HDfair)
 
-test_check("FairReg")
+test_check("HDfair")

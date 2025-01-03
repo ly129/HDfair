@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{multifair}
 \alias{multifair}
-\title{Main solver of \code{FairReg}}
+\title{Main solver of \code{HDfair}}
 \usage{
 multifair(
   x,
@@ -29,5 +29,5 @@ multifair(
 \item{outcome}{Character string or integer indicating the name of the outcome variable or the column index of the outcome variable.}
 }
 \description{
-Main solver of \code{FairReg}
+Main solver of \code{HDfair}
 }

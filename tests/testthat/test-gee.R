@@ -1,7 +1,7 @@
 # GEE
 
-# cd4 <- read.delim("~/Desktop/Research/FairReg/cd4.txt")
-tv90 <- read.csv("~/Desktop/Research/FairReg/TV1990.csv")
+# cd4 <- read.delim("~/Desktop/Research/HDfair/cd4.txt")
+tv90 <- read.csv("~/Desktop/Research/HDfair/TV1990.csv")
 
 n.unique <- length(unique(tv90$subject))
 

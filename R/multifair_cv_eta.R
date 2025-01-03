@@ -1,3 +1,4 @@
+#' @export
 multifair_cv_eta <- function(
     x,
     y,

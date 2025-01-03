@@ -1,15 +1,15 @@
 Package: HDfair
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Flexible and Adaptive Multitask Regression for Fairness-Aware Integration of High-Dimensional Data
+Version: 1.0.0
+Authors@R: c(person("Yi", "Lian", role = c("aut", "cre"), email = "yi.lian@pennmedicine.upenn.edu"),
+             person("Qi", "Long", role = c("aut")),
+             person("Changgee", "Chang", role = c("aut")))
+Description: Multitask regression with regularization-based joint variable selection and constraint on differences in task-specific model coefficients.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

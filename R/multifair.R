@@ -1,7 +1,3 @@
-#' Main solver of \code{HDfair}
-#' @param data A list containing the datasets from \eqn{M} sources.
-#' @param outcome Character string or integer indicating the name of the outcome variable or the column index of the outcome variable.
-#' @param group Character string or integer indicating the name of the grouping variable or the column index of the grouping variable.
 multifair <- function(X,
                       y,
                       group,

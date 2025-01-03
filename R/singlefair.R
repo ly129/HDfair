@@ -1,5 +1,3 @@
-#' Main solver of \code{HDfair}
-#' @param X Predictors.
 singlefair <- function(X,
                        y,
                        group,

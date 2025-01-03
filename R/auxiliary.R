@@ -35,6 +35,7 @@ fair_metric <- function(th, p, M, A) {
   return(list(fair = fair, fair_gr = gr))
 }
 
+#' @export
 # check metric
 metric_check <- function(th) {
   dims <- dim(th)

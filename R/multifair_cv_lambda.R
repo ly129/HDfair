@@ -1,3 +1,4 @@
+#' @export
 multifair_cv_lambda <- function(
     x,
     y,

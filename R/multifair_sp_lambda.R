@@ -1,3 +1,4 @@
+#' @export
 multifair_sp_lambda <- function(
     x,
     y,

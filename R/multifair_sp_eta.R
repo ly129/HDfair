@@ -1,3 +1,4 @@
+#' @export
 multifair_sp_eta <- function(
     x,
     y,

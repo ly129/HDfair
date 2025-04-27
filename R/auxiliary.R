@@ -48,8 +48,8 @@ metric_check <- function(th) {
 
 # fair metric with th of list object
 fair_metric_list <- function(th_ma, p, M, A) {
-  th <- array(unlist(th_ma), dim = c(p, M, A))
-  th_bar <- apply(th, 1:2, mean)
+  th_array <- array(unlist(th_ma), dim = c(p, M, A))
+  th_bar <- apply(th_array, 1:2, mean)
   th_ctrd <- apply(X = th, MARGIN = 3,
                    FUN = "-", th_bar, simplify = FALSE)
   th_ctrd <- array(unlist(th_ctrd), dim = c(p, M, A))

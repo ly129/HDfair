@@ -18,6 +18,8 @@ HDfair_sp_lambda <- function(
   M = max(ma[,1])
   A = max(ma[,2])
 
+  if (!is.null(lambda_seq)) lambda_length <- length(lambda_seq)
+
   thetas <- array(dim = c(p, A, M, lambda_length))
   g <- matrix(nrow = A, ncol = lambda_length)
   iters <- integer(lambda_length)
@@ -81,18 +83,18 @@ HDfair_sp_lambda <- function(
 
 #' @export
 
-plot_sp_lambda <- function(sp_lambda) {
+plot_sp_lambda <- function(sp_lambda, lam = NULL) {
   thetas <- sp_lambda$estimates
   lambdas <- sp_lambda$lambdas
 
   M <- dim(thetas)[3]
   A <- dim(thetas)[2]
 
-  par(mfrow = c(M, A))
   for (m in 1:M) {
     for (a in 1:A) {
-      matplot(lambdas, t(thetas[, a, m, ]), type = "l", log = "x")
+      matplot(lambdas, t(thetas[, a, m, ]), type = "l", log = "x",
+              main = paste0("Site ", m, ", Group ", a))
+      if (!is.null(lam)) abline(v = lam, lty = 2)
     }
   }
-  par(mfrow = c(1, 1))
 }

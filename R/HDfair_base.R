@@ -1,3 +1,4 @@
+#' @export
 HDfair <- function(
     X,
     y,

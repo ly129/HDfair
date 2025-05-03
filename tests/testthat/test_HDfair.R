@@ -191,3 +191,62 @@ plot_sp_eta(cv_eta$sp)
 
 cv_lambda$sp$estimates[,,,cv_lambda$index[1]]
 cv_eta$sp$estimates[,,,cv_eta$index[1]]
+
+
+
+
+
+
+
+
+
+
+##############################################################################
+# # check solution path
+# # solution path in CV and SP and individual HDfair base are equal
+# lambdas <- cv_lambda$lambda
+#
+# sp_lambda <- HDfair_sp_lambda(
+#   X = X,
+#   y = y,
+#   ma = ma,
+#   lambda_seq = lambdas,
+#   eta = p * 100, # arbitrary large eta so that fairness constraint is inactive
+#   rho = rho,
+#   adj=adj,
+#   eps=eps,
+#   maxiter=maxiter,
+#   verbose = verbose
+# )
+#
+# par(mfrow = c(1, 3))
+# plot_sp_lambda(sp_lambda)
+#
+# estimates <- array(NA, dim = c(p, A, M, lambda_length))
+#
+# for (i in 1:lambda_length) {
+#   lam <- lambdas[i]
+#
+#   fit <- HDfair(
+#     X = X,
+#     y = y,
+#     ma = ma,
+#     lambda = lam,
+#     eta = p * 100, # arbitrary large eta so that fairness constraint is inactive
+#     rho = rho,
+#     adj=adj,
+#     eps=eps,
+#     maxiter=maxiter,
+#     verbose = verbose
+#   )
+#
+#   estimates[,,,i] <- fit$th
+# }
+#
+#
+# matplot(lambdas, t(estimates[, 1, 1,]), type = "l", log = "x")
+# matplot(lambdas, t(estimates[, 2, 1,]), type = "l", log = "x")
+# matplot(lambdas, t(estimates[, 3, 1,]), type = "l", log = "x")
+#
+# par(mfrow = c(1, 1))
+##############################################################################

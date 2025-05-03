@@ -20,6 +20,8 @@ HDfair_sp_eta <- function(
   M = max(ma[,1])
   A = max(ma[,2])
 
+  if (!is.null(eta_seq)) eta_length <- length(eta_seq)
+
   thetas <- array(dim = c(p, A, M, eta_length))
   g <- matrix(nrow = A, ncol = eta_length)
   iters <- integer(eta_length)
@@ -89,18 +91,17 @@ HDfair_sp_eta <- function(
 
 #' @export
 
-plot_sp_eta <- function(sp_eta, vars = 1:5) {
+plot_sp_eta <- function(sp_eta, eta = NULL, vars = 1:5) {
   thetas <- sp_eta$estimates
   etas <- sp_eta$etas
 
   M <- dim(thetas)[3]
   A <- dim(thetas)[2]
 
-  par(mfrow = c(M, length(vars)))
   for (m in 1:M) {
     for (v in vars) {
       matplot(etas, t(thetas[v, , m, ]), type = "l", log = "x")
+      if (!is.null(eta)) abline(v = eta, lty = 2)
     }
   }
-  par(mfrow = c(1, 1))
 }

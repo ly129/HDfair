@@ -96,7 +96,7 @@ HDfair_cv_eta <- function(
         val_yma <- val_y[index_ma]
         for (l in 1:eta_length) {
           th_mal <- sp_fold$estimates[, a, m, l]
-          loss_mat[i, l] <- loss_mat[i, l] + sum((val_yma - val_xma %*% th_mal)^2)
+          loss_mat[i, l] <- loss_mat[i, l] + sum((val_yma - val_xma %*% th_mal)^2)/N
         }
       }
     }

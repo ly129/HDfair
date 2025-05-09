@@ -7,9 +7,8 @@ HDfair_cv_eta <- function(
     eta_length,
     eta_ratio,
     nfold,
+    foldid = NULL,
     rho,
-    th_init=NULL,
-    delta_init=NULL,
     adj=1,
     eps=1e-6,
     maxiter=1e4,
@@ -33,8 +32,6 @@ HDfair_cv_eta <- function(
     eta_length = eta_length,
     eta_ratio = eta_ratio,
     rho = rho,
-    th_init=th_init,
-    delta_init=delta_init,
     adj=adj,
     eps=eps,
     maxiter=maxiter,
@@ -50,14 +47,18 @@ HDfair_cv_eta <- function(
   eta.seq <- sp$etas
 
   ### train-test split and pre-allocate result storage
-  grp <- with(as.data.frame(ma), paste(V1, V2, sep = "_"))
-  fold_id <- integer(nrow(ma))
+  if (is.null(foldid)) {
+    grp <- with(as.data.frame(ma), paste(V1, V2, sep = "_"))
+    fold_id <- integer(nrow(ma))
 
-  for (g in unique(grp)) {
-    idx <- which(grp == g)
-    n   <- length(idx)
-    # assign 1:K in a recycled way, then shuffle
-    fold_id[idx] <- sample(rep(seq_len(nfold), length.out = n))
+    for (g in unique(grp)) {
+      idx <- which(grp == g)
+      n   <- length(idx)
+      # assign 1:K in a recycled way, then shuffle
+      fold_id[idx] <- sample(rep(seq_len(nfold), length.out = n))
+    }
+  } else {
+    fold_id <- foldid
   }
 
   loss_mat <- matrix(0, nrow = nfold, ncol = eta_length)
@@ -81,8 +82,6 @@ HDfair_cv_eta <- function(
       lambda = lambda,
       eta_seq = eta.seq,
       rho = rho,
-      th_init=th_init,
-      delta_init=delta_init,
       adj=adj,
       eps=eps,
       maxiter=maxiter,
@@ -96,7 +95,7 @@ HDfair_cv_eta <- function(
         val_yma <- val_y[index_ma]
         for (l in 1:eta_length) {
           th_mal <- sp_fold$estimates[, a, m, l]
-          loss_mat[i, l] <- loss_mat[i, l] + sum((val_yma - val_xma %*% th_mal)^2)/N
+          loss_mat[i, l] <- loss_mat[i, l] + sum((val_yma - val_xma %*% th_mal)^2)/sum(which_val)
         }
       }
     }

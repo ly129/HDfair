@@ -6,6 +6,7 @@ HDfair_cv_lambda <- function(
     lambda_length,
     lambda_ratio,
     nfold,
+    foldid = NULL,
     eta,
     rho,
     adj=1,
@@ -46,14 +47,18 @@ HDfair_cv_lambda <- function(
   lam.seq <- sp$lambdas
 
   ### train-test split and pre-allocate result storage
-  grp <- with(as.data.frame(ma), paste(V1, V2, sep = "_"))
-  fold_id <- integer(nrow(ma))
+  if (is.null(foldid)) {
+    grp <- with(as.data.frame(ma), paste(V1, V2, sep = "_"))
+    fold_id <- integer(nrow(ma))
 
-  for (g in unique(grp)) {
-    idx <- which(grp == g)
-    n   <- length(idx)
-    # assign 1:K in a recycled way, then shuffle
-    fold_id[idx] <- sample(rep(seq_len(nfold), length.out = n))
+    for (g in unique(grp)) {
+      idx <- which(grp == g)
+      n   <- length(idx)
+      # assign 1:K in a recycled way, then shuffle
+      fold_id[idx] <- sample(rep(seq_len(nfold), length.out = n))
+    }
+  } else {
+    fold_id <- foldid
   }
 
   loss_mat <- matrix(0, nrow = nfold, ncol = lambda_length)
@@ -90,7 +95,7 @@ HDfair_cv_lambda <- function(
         val_yma <- val_y[index_ma]
         for (l in 1:lambda_length) {
           th_mal <- sp_fold$estimates[, a, m, l]
-          loss_mat[i, l] <- loss_mat[i, l] + sum((val_yma - val_xma %*% th_mal)^2)/N
+          loss_mat[i, l] <- loss_mat[i, l] + sum((val_yma - val_xma %*% th_mal)^2)/sum(which_val)
         }
       }
     }

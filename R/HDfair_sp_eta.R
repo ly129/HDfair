@@ -8,8 +8,6 @@ HDfair_sp_eta <- function(
     eta_ratio = 1e-2,
     eta_seq = NULL,
     rho,
-    th_init = NULL,
-    delta_init = NULL,
     adj=1,
     eps=1e-6,
     maxiter=1e4,
@@ -30,17 +28,17 @@ HDfair_sp_eta <- function(
     # determine eta max that the constraints begin to have an effect
     eta_init <- 1e3
     while (TRUE) {
-      fit = HDfair(X = X,
-                   y = y,
-                   ma = ma,
-                   lambda = lambda,
-                   eta = eta_init,
-                   rho = rho,
-                   th_init = th_init,
-                   delta_init = NULL,
-                   adj = adj,
-                   eps = eps,
-                   maxiter = maxiter)
+      fit <- HDfair(X = X,
+                    y = y,
+                    ma = ma,
+                    lambda = lambda,
+                    eta = eta_init,
+                    rho = rho,
+                    th_init = NULL,
+                    delta_init = NULL,
+                    adj = adj,
+                    eps = eps,
+                    maxiter = maxiter)
       eta_max <- max(fit$g)
       if (eta_max < eta_init) {
         break

@@ -6,6 +6,7 @@ HDfair <- function(
     lambda,
     eta,
     rho,
+    weighted = FALSE,
     th_init=NULL,
     delta_init=NULL,
     adj=1,
@@ -50,19 +51,20 @@ HDfair <- function(
       Xth <- Xma %*% thma
       y_Xth <- yma - Xth
 
-      h <- h + 0.5 * sum(y_Xth^2)
-      hgr[, a, m] <- - t(Xma) %*% y_Xth
-
-      # sum of mean at each m and a
+      # sum of mean at each m and a (weighted)
       # vs
-      # sum of all obs at each m and a
+      # sum of all obs at each m and a (unweighted): basically upweighs minority
+
       # also needs to modify the loss function in cv_lambda and cv_eta
       # also modify lambda max in sp_lambda
 
-      h <- h + 0.5 * sum(y_Xth^2)/N
-      hgr[, a, m] <- - t(Xma) %*% y_Xth/N
-      # h <- h + 0.5 * mean(y_Xth^2)
-      # hgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]
+      if (weighted) {
+        h <- h + 0.5 * mean(y_Xth^2)
+        hgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]
+      } else {
+        h <- h + 0.5 * sum(y_Xth^2)/N
+        hgr[, a, m] <- - t(Xma) %*% y_Xth/N
+      }
     }
   }
 
@@ -111,10 +113,13 @@ HDfair <- function(
           Xth <- Xma %*% thma
           y_Xth <- yma - Xth
 
-          nh <- nh + 0.5 * sum(y_Xth^2)/N
-          nhgr[, a, m] <- - t(Xma) %*% y_Xth/N
-          # nh <- nh + 0.5 * mean(y_Xth^2)
-          # nhgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]
+          if (weighted) {
+            nh <- nh + 0.5 * mean(y_Xth^2)
+            nhgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]
+          } else {
+            nh <- nh + 0.5 * sum(y_Xth^2)/N
+            nhgr[, a, m] <- - t(Xma) %*% y_Xth/N
+          }
         }
       }
 

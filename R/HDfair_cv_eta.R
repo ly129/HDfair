@@ -9,6 +9,7 @@ HDfair_cv_eta <- function(
     nfold,
     foldid = NULL,
     rho,
+    weighted = FALSE,
     adj=1,
     eps=1e-6,
     maxiter=1e4,
@@ -32,6 +33,7 @@ HDfair_cv_eta <- function(
     eta_length = eta_length,
     eta_ratio = eta_ratio,
     rho = rho,
+    weighted = weighted,
     adj=adj,
     eps=eps,
     maxiter=maxiter,
@@ -82,6 +84,7 @@ HDfair_cv_eta <- function(
       lambda = lambda,
       eta_seq = eta.seq,
       rho = rho,
+      weighted = weighted,
       adj=adj,
       eps=eps,
       maxiter=maxiter,
@@ -100,7 +103,7 @@ HDfair_cv_eta <- function(
       }
     }
   }
-  # loss_mat
+
 
   ### cv evaluation
   cvm <- apply(loss_mat, MARGIN = 2, FUN = mean)

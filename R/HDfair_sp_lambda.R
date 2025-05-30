@@ -8,6 +8,7 @@ HDfair_sp_lambda <- function(
     lambda_seq = NULL,
     eta,
     rho,
+    weighted = FALSE,
     adj=1,
     eps=1e-6,
     maxiter=1e4,
@@ -33,8 +34,11 @@ HDfair_sp_lambda <- function(
         Xma <- X[maids, ]
         yma <- y[maids]
 
-        Xy[, (m-1)*A+a] <- crossprod(Xma, yma)/N
-        # Xy[, (m-1)*A+a] <- crossprod(Xma, yma)/sum(maids)
+        if (weighted) {
+          Xy[, (m-1)*A+a] <- crossprod(Xma, yma)/sum(maids)
+        } else {
+          Xy[, (m-1)*A+a] <- crossprod(Xma, yma)/N
+        }
       }
     }
     row_norms <- sqrt(rowSums(Xy^2))
@@ -58,6 +62,7 @@ HDfair_sp_lambda <- function(
                  lambda = lambda.tmp,
                  eta = eta,
                  rho = rho,
+                 weighted = weighted,
                  th_init = theta,
                  delta_init = delta,
                  adj = adj,

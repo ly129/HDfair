@@ -1,3 +1,32 @@
+#' HDfair: High‑Dimensional Fairness‑Aware Integration via Augmented Lagrangian Method
+#'
+#' Fits a fairness‑aware integration model for high‑dimensional data from
+#' multiple sources and groups for a single pair of tuning parameters (\code{lambda}, \code{eta}).
+#' This is the base function that solves for one \code{lambda} and one \code{eta}.
+#'
+#' @param X Numeric matrix of dimension \eqn{n \times p}; the design matrix.
+#' @param y Numeric vector of length \eqn{n}; the response variable.
+#' @param ma Integer matrix of dimension \eqn{n \times 2}; the first column is the source indicator (1, 2, ...), and the second column is the group indicator (1, 2, ...).
+#' @param lambda Numeric scalar; tuning parameter for the group lasso penalty.
+#' @param eta Numeric scalar; fairness constraint controlling the maximum allowable difference between group‑specific coefficients.
+#' @param rho Numeric scalar; augmented Lagrangian parameter for the optimization.
+#' @param weighted Logical; if \code{TRUE}, computes the loss as the average mean squared error across sources and groups; if \code{FALSE}, computes the unweighted sum of squared errors over all individuals.
+#' @param th_init Numeric array of dimension \eqn{p \times M \times A}; initial values for the coefficient array \eqn{\theta}, where \eqn{M} is the number of sources and \eqn{A} is the number of groups.
+#' @param delta_init Numeric vector of length \eqn{A}; initial values for the Lagrangian multiplier.
+#' @param adj Numeric scalar; optional factor applied to the Lagrangian multiplier updates.
+#' @param eps Numeric scalar; convergence tolerance based on the L2 norm of the coefficient updates.
+#' @param maxiter Integer; maximum number of augmented Lagrangian iterations.
+#' @param verbose Logical; if \code{TRUE}, prints iteration details.
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{th}{Estimated coefficient array of dimension \eqn{p \times M \times A}.}
+#'   \item{g}{Final group‑specific fairness values.}
+#'   \item{delta}{Final Lagrangian multiplier vector.}
+#'   \item{h}{Final loss value.}
+#'   \item{iter}{Number of iterations performed.}
+#'   \item{rho}{Final augmented Lagrangian parameter value.}
+#' }
 #' @export
 HDfair <- function(
     X,
@@ -59,8 +88,8 @@ HDfair <- function(
       # also modify lambda max in sp_lambda
 
       if (weighted) {
-        h <- h + 0.5 * mean(y_Xth^2)
-        hgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]
+        h <- h + 0.5 * mean(y_Xth^2)/M/A
+        hgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]/M/A
       } else {
         h <- h + 0.5 * sum(y_Xth^2)/N
         hgr[, a, m] <- - t(Xma) %*% y_Xth/N
@@ -114,8 +143,8 @@ HDfair <- function(
           y_Xth <- yma - Xth
 
           if (weighted) {
-            nh <- nh + 0.5 * mean(y_Xth^2)
-            nhgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]
+            nh <- nh + 0.5 * mean(y_Xth^2)/M/A
+            nhgr[, a, m] <- - t(Xma) %*% y_Xth/n[m,a]/M/A
           } else {
             nh <- nh + 0.5 * sum(y_Xth^2)/N
             nhgr[, a, m] <- - t(Xma) %*% y_Xth/N

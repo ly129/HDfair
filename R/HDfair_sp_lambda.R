@@ -1,3 +1,31 @@
+#' HDfair_sp_lambda: Compute HDfair Solution Path over Lambda
+#'
+#' Computes HDfair coefficient estimates across a sequence of \eqn{\lambda} values for a fixed \code{eta}, using warm starts to improve computational efficiency.
+#' Returns an object of class "HDfair_sp" containing estimates, lambda sequence, iteration counts, and fairness penalty values for each \eqn{\lambda}.
+#'
+#' @param X Numeric matrix of dimension \eqn{n \times p}; the design matrix.
+#' @param y Numeric vector of length \eqn{n}; the response variable.
+#' @param ma Integer matrix of dimension \eqn{n \times 2}; the first column is the source indicator and the second column is the group indicator.
+#' @param lambda_length Integer; number of \eqn{\lambda} values in the default sequence (ignored if \code{lambda_seq} is provided).
+#' @param lambda_ratio Numeric; ratio between the smallest and largest \eqn{\lambda} in the default sequence (ignored if \code{lambda_seq} is provided).
+#' @param lambda_seq Numeric vector; optional user-specified sequence of \eqn{\lambda} values. If provided, overrides \code{lambda_length} and \code{lambda_ratio}.
+#' @param eta Numeric scalar; fairness-penalty parameter (constraint threshold).
+#' @param rho Numeric scalar; augmented Lagrangian parameter.
+#' @param weighted Logical; if \code{TRUE}, computes the loss as the sum of mean losses over sources and groups; if \code{FALSE}, computes loss as the sum over all observations.
+#' @param adj Numeric scalar; optional factor applied to the Lagrangian multiplier updates.
+#' @param eps Numeric scalar; convergence tolerance based on the L2 norm of the coefficient updates.
+#' @param maxiter Integer; maximum number of augmented Lagrangian iterations per \eqn{\lambda}.
+#' @param verbose Logical; if \code{TRUE}, prints iteration details (e.g., parameter updates and multiplier values) for each \eqn{\lambda}.
+#'
+#' @return An object of class "HDfair_sp" with components:
+#' \describe{
+#'   \item{estimates}{Array of dimension \eqn{p \times A \times M \times L}, where \eqn{L} is the number of \eqn{\lambda} values; estimated coefficients for each source/group and \eqn{\lambda}.}
+#'   \item{lambdas}{Numeric vector of \eqn{\lambda} values used.}
+#'   \item{iterations}{Integer vector of length \eqn{L}; iterations taken to converge for each \eqn{\lambda}.}
+#'   \item{g}{Matrix of dimension \eqn{A \times L}; final fairness penalty values for each group and \eqn{\lambda}.}
+#' }
+#'
+#' @seealso \code{\link{HDfair}}, \code{\link{plot_sp_lambda}}
 #' @export
 HDfair_sp_lambda <- function(
     X,
@@ -35,7 +63,7 @@ HDfair_sp_lambda <- function(
         yma <- y[maids]
 
         if (weighted) {
-          Xy[, (m-1)*A+a] <- crossprod(Xma, yma)/sum(maids)
+          Xy[, (m-1)*A+a] <- crossprod(Xma, yma)/sum(maids)/M/A
         } else {
           Xy[, (m-1)*A+a] <- crossprod(Xma, yma)/N
         }
@@ -86,6 +114,14 @@ HDfair_sp_lambda <- function(
   return(return.obj)
 }
 
+#' plot_sp_lambda: Plot HDfair Solution Path over Lambda
+#'
+#' Plots the HDfair coefficient paths for each source and group against \eqn{\lambda} on a log scale.
+#'
+#' @param sp_lambda An object of class "HDfair_sp", as returned by \code{HDfair_sp_lambda}.
+#' @param lam Numeric scalar; optional \eqn{\lambda} value at which to draw a vertical reference line.
+#'
+#' @return NULL; this function is called for its side effect of generating plots.
 #' @export
 
 plot_sp_lambda <- function(sp_lambda, lam = NULL) {

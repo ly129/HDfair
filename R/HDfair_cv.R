@@ -65,8 +65,8 @@ HDfair_cv <- function(
 
   loss_mat <- array(0, dim = c(nfold, lambda_length, eta_length))
 
-  for (ll in 1:lambda_length) {
-    lam.tmp <- sp$estimates[,,,ll]
+  for (ll in 2:lambda_length) {
+    lam.tmp <- sp$lambdas[ll]
 
     cv_eta <- HDfair_cv_eta(
       X = X,
@@ -81,7 +81,7 @@ HDfair_cv <- function(
       adj=adj,
       eps=eps,
       maxiter=maxiter,
-      verbose = verbose
+      verbose = TRUE
     )
   }
 }

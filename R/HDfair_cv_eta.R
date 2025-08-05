@@ -1,4 +1,40 @@
-#' @export
+#' HDfair_cv_eta: Cross-Validation for Optimal Eta
+#'
+#' Performs K-fold cross-validation over a sequence of \eqn{\eta} values to select an optimal
+#' fairness-penalty parameter for HDfair, using warm-started solution paths from \code{HDfair_sp_eta}.
+#'
+#' @param X Numeric matrix of dimension \eqn{n \times p}; the design matrix.
+#' @param y Numeric vector of length \eqn{n}; the response variable.
+#' @param ma Integer matrix of dimension \eqn{n \times 2}; first column is source indicator (1,...,M), second column is group indicator (1,...,A).
+#' @param lambda Numeric scalar; fixed group-lasso penalty parameter.
+#' @param eta_length Integer; number of \eqn{\eta} values to consider if \code{eta_seq} is NULL.
+#' @param eta_ratio Numeric scalar; ratio of minimum to maximum \eqn{\eta} when constructing a default sequence.
+#' @param nfold Integer; number of cross-validation folds.
+#' @param foldid Optional integer vector of length \eqn{n} specifying fold assignments; default generates stratified folds by group-source.
+#' @param rho Numeric scalar; augmented Lagrangian parameter for optimization.
+#' @param weighted Logical; if \code{TRUE}, computes validation loss as mean over sources and groups; otherwise uses pooled sum over all observations.
+#' @param adj Numeric scalar; adjustment factor applied to multiplier updates.
+#' @param eps Numeric scalar; convergence tolerance for coefficient updates.
+#' @param maxiter Integer; maximum number of augmented Lagrangian iterations.
+#' @param verbose Logical; if \code{TRUE}, prints iteration details.
+#'
+#' @return An object of class \code{"HDfair_cv"} containing:
+#' \describe{
+#'   \item{eta}{Vector of \eqn{\eta} values considered.}
+#'   \item{cvm}{Mean cross-validation error for each \eqn{\eta}.}
+#'   \item{cvsd}{Standard error of CV error across folds.}
+#'   \item{cvup}{Upper bound = \code{cvm + cvsd}.}
+#'   \item{cvlo}{Lower bound = \code{cvm - cvsd}.}
+#'   \item{nzero}{Array of dimension \eqn{M \times A \times L}, where \eqn{L} is the length of \eqn{\eta}, giving number of nonzeros in each fit.}
+#'   \item{eta.min}{Selected \eqn{\eta} with minimum CV error.}
+#'   \item{eta.1se}{Largest \eqn{\eta} within one standard error of minimum CV error.}
+#'   \item{index}{Named indices \code{eta.min} and \code{eta.1se}.}
+#'   \item{foldid}{Fold assignments used.}
+#'   \item{sp}{Solution path object returned by \code{HDfair_sp_eta}.}
+#' }
+#'
+#' @seealso \code{\link{HDfair_sp_eta}}, \code{\link{plot_cv_eta}}
+#' #' @export
 HDfair_cv_eta <- function(
     X,
     y,
@@ -103,7 +139,7 @@ HDfair_cv_eta <- function(
       }
     }
   }
-
+  if (weighted) loss_mat <- loss_mat/M/A
 
   ### cv evaluation
   cvm <- apply(loss_mat, MARGIN = 2, FUN = mean)
@@ -148,7 +184,13 @@ HDfair_cv_eta <- function(
 
 
 
-
+#' plot_cv_eta: Plot Cross-Validation Results over Eta
+#'
+#' Plots mean cross-validation error and error bars against log(eta), marking
+#' the selected \code{eta.min} and \code{eta.1se} values.
+#'
+#' @param cv_eta An object of class \code{"HDfair_cv"} returned by \code{HDfair_cv_eta}.
+#' @param ... Additional graphical parameters passed to \code{plot}.
 #' @export
 
 plot_cv_eta <- function(cv_eta) {

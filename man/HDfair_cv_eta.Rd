@@ -72,5 +72,4 @@ fairness-penalty parameter for HDfair, using warm-started solution paths from \c
 }
 \seealso{
 \code{\link{HDfair_sp_eta}}, \code{\link{plot_cv_eta}}
-#' @export
 }

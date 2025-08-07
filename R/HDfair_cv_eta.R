@@ -34,7 +34,7 @@
 #' }
 #'
 #' @seealso \code{\link{HDfair_sp_eta}}, \code{\link{plot_cv_eta}}
-#' #' @export
+#' @export
 HDfair_cv_eta <- function(
     X,
     y,

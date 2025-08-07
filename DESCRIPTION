@@ -5,7 +5,7 @@ Version: 1.0.0
 Authors@R: c(person("Yi", "Lian", role = c("aut", "cre"), email = "yi.lian@pennmedicine.upenn.edu"),
              person("Qi", "Long", role = c("aut")),
              person("Changgee", "Chang", role = c("aut")))
-Description: Multitask regression with regularization-based joint variable selection and constraint on differences in task-specific model coefficients.
+Description: Flexible and Adaptive Fairness-Aware Integration of High-Dimensional Data.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

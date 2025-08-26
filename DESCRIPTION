@@ -1,6 +1,6 @@
 Package: HDfair
 Type: Package
-Title: Flexible and Adaptive Multitask Regression for Fairness-Aware Integration of High-Dimensional Data
+Title: Flexible and Adaptive Fairness-Aware Integration of High-Dimensional Data
 Version: 1.0.0
 Authors@R: c(person("Yi", "Lian", role = c("aut", "cre"), email = "yi.lian@pennmedicine.upenn.edu"),
              person("Qi", "Long", role = c("aut")),
